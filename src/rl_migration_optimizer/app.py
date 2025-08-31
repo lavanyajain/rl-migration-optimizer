@@ -143,13 +143,39 @@ def main():
             st.error("❌ Training failed")
         
         # Performance metrics
-        st.markdown("#### 📊 **Performance Metrics**")
+        st.markdown("#### 📊 **System Status**")
         try:
-            metrics = st.session_state.rl_optimizer.get_performance_metrics()
-            st.metric("Total Optimizations", metrics.get('total_optimizations', 0))
-            st.metric("Avg Quality Score", f"{metrics.get('avg_quality_score', 0):.3f}")
-            st.metric("Avg Processing Time", f"{metrics.get('avg_processing_time', 0):.1f} min")
-            st.metric("Success Probability", f"{metrics.get('avg_success_probability', 0):.1%}")
+            # Get current session metrics
+            total_optimizations = len(st.session_state.optimization_history)
+            current_strategy = st.session_state.current_strategy
+            
+            # Display meaningful metrics
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("Session Optimizations", total_optimizations)
+            
+            with col2:
+                if current_strategy:
+                    quality = current_strategy['expected_performance']['quality_score']
+                    st.metric("Latest Quality", f"{quality:.1%}")
+                else:
+                    st.metric("Latest Quality", "N/A")
+            
+            with col3:
+                if current_strategy:
+                    time = current_strategy['expected_performance']['processing_time_minutes']
+                    st.metric("Latest Time", f"{time:.1f} min")
+                else:
+                    st.metric("Latest Time", "N/A")
+            
+            with col4:
+                if current_strategy:
+                    risk = current_strategy['risk_assessment']['risk_level']
+                    st.metric("Latest Risk", risk)
+                else:
+                    st.metric("Latest Risk", "N/A")
+                    
         except Exception as e:
             st.error(f"Error loading metrics: {e}")
     
@@ -429,9 +455,37 @@ def main():
             for point in recommendations['monitoring_points']:
                 st.markdown(f"• **{point['metric'].title()}**: {point['frequency']} - {point['threshold']}")
     
+    # Session Summary and History
+    st.markdown("---")
+    
+    # Session Summary
+    if st.session_state.optimization_history:
+        st.markdown("### 📊 **Session Summary**")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Total Strategies Generated", len(st.session_state.optimization_history))
+        
+        with col2:
+            if st.session_state.optimization_history:
+                avg_quality = sum(
+                    entry['strategy']['expected_performance']['quality_score'] 
+                    for entry in st.session_state.optimization_history
+                ) / len(st.session_state.optimization_history)
+                st.metric("Average Quality Score", f"{avg_quality:.1%}")
+            else:
+                st.metric("Average Quality Score", "N/A")
+        
+        with col3:
+            if st.session_state.optimization_history:
+                risk_levels = [entry['strategy']['risk_assessment']['risk_level'] for entry in st.session_state.optimization_history]
+                most_common_risk = max(set(risk_levels), key=risk_levels.count)
+                st.metric("Most Common Risk Level", most_common_risk)
+            else:
+                st.metric("Most Common Risk Level", "N/A")
+    
     # Optimization history
     if st.session_state.optimization_history:
-        st.markdown("---")
         st.markdown("### 📚 **Optimization History**")
         
         # Create history dataframe
