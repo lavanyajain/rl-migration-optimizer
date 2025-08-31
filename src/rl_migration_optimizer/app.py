@@ -164,53 +164,82 @@ def main():
             col1a, col1b = st.columns(2)
             
             with col1a:
-                table_name = st.text_input("Table Name", value="public.authors")
-                table_size = st.number_input("Table Size (MB)", min_value=1, max_value=50000, value=2500)
-                schema_complexity = st.slider("Schema Complexity", 0.0, 1.0, 0.7, 0.1)
-                data_type = st.selectbox("Data Type", ["structured", "semi-structured", "unstructured"])
-                source_system = st.selectbox("Source System", ["postgresql", "mysql", "oracle", "sqlserver"])
-                target_system = st.selectbox("Target System", ["hive", "bigquery", "snowflake", "redshift"])
+                table_name = st.text_input("Table/Collection Name", value="users_table", help="Name of your data table, collection, or dataset")
+                table_size = st.number_input("Data Size (MB)", min_value=1, max_value=1000000, value=2500, help="Total size of your data in MB")
+                schema_complexity = st.slider("Schema Complexity", 0.0, 1.0, 0.7, 0.1, help="0.0 = Simple flat structure, 1.0 = Complex nested relationships")
+                data_type = st.selectbox("Data Type", ["structured", "semi-structured", "unstructured", "mixed"], help="Structure of your data")
+                source_system = st.selectbox("Source System", ["postgresql", "mysql", "oracle", "sqlserver", "mongodb", "cassandra", "redis", "elasticsearch", "csv", "json", "parquet", "avro", "other"], help="Where your data currently resides")
+                target_system = st.selectbox("Target System", ["spark", "hive", "bigquery", "snowflake", "redshift", "databricks", "emr", "kubernetes", "local", "cloud", "hybrid", "other"], help="Where you want to migrate your data")
             
             with col1b:
-                current_quality = st.slider("Current Quality Score", 0.0, 1.0, 0.85, 0.05)
-                priority = st.selectbox("Priority Level", [1, 2, 3, 4, 5], index=2)
+                current_quality = st.slider("Current Data Quality", 0.0, 1.0, 0.85, 0.05, help="How clean and accurate is your current data")
+                priority = st.selectbox("Migration Priority", [1, 2, 3, 4, 5], index=2, help="1 = Low priority, 5 = Critical business need")
                 
-                st.markdown("#### **Resource Constraints**")
-                cpu_utilization = st.slider("CPU Utilization", 0.0, 1.0, 0.6, 0.1)
-                memory_utilization = st.slider("Memory Utilization", 0.0, 1.0, 0.7, 0.1)
-                network_bandwidth = st.slider("Network Bandwidth", 0.0, 1.0, 0.8, 0.1)
-                disk_io = st.slider("Disk I/O", 0.0, 1.0, 0.5, 0.1)
-                concurrent_migrations = st.number_input("Concurrent Migrations", min_value=1, max_value=10, value=2)
+                st.markdown("#### **Resource & Performance Constraints**")
+                cpu_utilization = st.slider("Available CPU", 0.0, 1.0, 0.6, 0.1, help="0.0 = No CPU available, 1.0 = Full CPU access")
+                memory_utilization = st.slider("Available Memory", 0.0, 1.0, 0.7, 0.1, help="0.0 = No memory available, 1.0 = Full memory access")
+                network_bandwidth = st.slider("Network Speed", 0.0, 1.0, 0.8, 0.1, help="0.0 = Slow network, 1.0 = High-speed network")
+                disk_io = st.slider("Storage Performance", 0.0, 1.0, 0.5, 0.1, help="0.0 = Slow storage, 1.0 = High-performance storage")
+                concurrent_migrations = st.number_input("Parallel Jobs", min_value=1, max_value=50, value=2, help="How many migrations can run simultaneously")
+        
+        # Advanced Configuration Options
+        with st.expander("🔧 **Advanced Configuration Options**", expanded=False):
+            col_adv1, col_adv2 = st.columns(2)
+            
+            with col_adv1:
+                st.markdown("#### **Data Characteristics**")
+                data_volume = st.selectbox("Data Volume Pattern", ["small", "medium", "large", "massive"], help="Expected data growth pattern")
+                update_frequency = st.selectbox("Update Frequency", ["batch", "near-real-time", "real-time", "streaming"], help="How often data changes")
+                data_consistency = st.selectbox("Consistency Requirements", ["eventual", "strong", "weak", "mixed"], help="Data consistency needs")
+                backup_requirements = st.selectbox("Backup Strategy", ["none", "basic", "comprehensive", "disaster-recovery"], help="Backup and recovery needs")
+            
+            with col_adv2:
+                st.markdown("#### **Business Requirements**")
+                compliance_needs = st.selectbox("Compliance", ["none", "gdpr", "hipaa", "sox", "pci", "other"], help="Regulatory compliance requirements")
+                sla_requirements = st.selectbox("SLA Requirements", ["flexible", "standard", "strict", "critical"], help="Service level agreement needs")
+                cost_constraints = st.selectbox("Cost Sensitivity", ["low", "medium", "high", "critical"], help="Budget constraints")
+                team_expertise = st.selectbox("Team Expertise", ["beginner", "intermediate", "advanced", "expert"], help="Technical team skill level")
         
         # Optimize button
-        if st.button("🎯 **Optimize Migration Strategy**", type="primary", use_container_width=True):
+        if st.button("🎯 **Generate Migration Strategy**", type="primary", use_container_width=True):
             with st.spinner("Optimizing migration strategy..."):
                 try:
-                    # Prepare table info
-                    table_info = {
-                        'name': table_name,
-                        'size_mb': table_size,
-                        'schema_complexity': schema_complexity,
-                        'data_type': data_type,
-                        'source_system': source_system,
-                        'target_system': target_system,
-                        'priority': priority
+                    # Prepare comprehensive configuration
+                    migration_config = {
+                        'basic_info': {
+                            'name': table_name,
+                            'size_mb': table_size,
+                            'schema_complexity': schema_complexity,
+                            'data_type': data_type,
+                            'source_system': source_system,
+                            'target_system': target_system,
+                            'priority': priority
+                        },
+                        'data_characteristics': {
+                            'volume_pattern': data_volume,
+                            'update_frequency': update_frequency,
+                            'consistency_requirements': data_consistency,
+                            'backup_strategy': backup_requirements
+                        },
+                        'business_requirements': {
+                            'compliance': compliance_needs,
+                            'sla_requirements': sla_requirements,
+                            'cost_constraints': cost_constraints,
+                            'team_expertise': team_expertise
+                        },
+                        'resource_constraints': {
+                            'cpu_utilization': cpu_utilization,
+                            'memory_utilization': memory_utilization,
+                            'network_bandwidth': network_bandwidth,
+                            'disk_io': disk_io,
+                            'concurrent_migrations': concurrent_migrations
+                        }
                     }
                     
-                    # Prepare resource constraints
-                    resource_constraints = {
-                        'cpu_utilization': cpu_utilization,
-                        'memory_utilization': memory_utilization,
-                        'network_bandwidth': network_bandwidth,
-                        'disk_io': disk_io,
-                        'concurrent_migrations': concurrent_migrations
-                    }
-                    
-                    # Optimize strategy
+                    # Generate comprehensive migration strategy
                     strategy = st.session_state.rl_optimizer.optimize_migration_strategy(
-                        table_info=table_info,
-                        current_quality=current_quality,
-                        resource_constraints=resource_constraints
+                        migration_config=migration_config,
+                        current_quality=current_quality
                     )
                     
                     st.session_state.current_strategy = strategy
