@@ -101,13 +101,77 @@ st.markdown("""
 def main():
     """Main Streamlit application."""
     
-    # Header
-    st.markdown("""
-    <div class="main-header">
-        <h1>🚀 Spark Migration Advisor</h1>
-        <p>AI-Powered Database Migration Strategy Generator with Spark Configuration Recommendations</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Header with Help
+    col_header1, col_header2 = st.columns([4, 1])
+    
+    with col_header1:
+        st.markdown("""
+        <div class="main-header">
+            <h1>🚀 Spark Migration Advisor</h1>
+            <p>AI-Powered Database Migration Strategy Generator with Spark Configuration Recommendations</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_header2:
+        if st.button("❓ **Help & Guide**", type="secondary", use_container_width=True):
+            st.session_state.show_help = not st.session_state.get('show_help', False)
+    
+    # Help and User Guide Section
+    if st.session_state.get('show_help', False):
+        with st.expander("📚 **User Guide & Help**", expanded=True):
+            st.markdown("""
+            ## 🎯 **How to Use Spark Migration Advisor**
+            
+            ### **Step 1: Configure Your Migration**
+            1. **Table/Collection Name**: Enter the name of your data source
+            2. **Data Size**: Specify the total size of your data in MB
+            3. **Schema Complexity**: Rate from 0.0 (simple) to 1.0 (complex)
+            4. **Data Type**: Choose structured, semi-structured, unstructured, or mixed
+            5. **Source System**: Select where your data currently resides
+            6. **Target System**: Choose where you want to migrate your data
+            
+            ### **Step 2: Set Resource Constraints**
+            1. **Available CPU**: How much CPU power you can allocate (0.0-1.0)
+            2. **Available Memory**: Memory allocation for migration (0.0-1.0)
+            3. **Network Speed**: Your network bandwidth (0.0-1.0)
+            4. **Storage Performance**: Disk I/O performance (0.0-1.0)
+            5. **Parallel Jobs**: Number of concurrent migration processes
+            
+            ### **Step 3: Advanced Configuration**
+            - **Data Characteristics**: Volume patterns, update frequency, consistency needs
+            - **Business Requirements**: Compliance, SLA, cost constraints, team expertise
+            
+            ### **Step 4: Generate Strategy**
+            Click **"Generate Migration Strategy"** to get AI-powered recommendations!
+            
+            ---
+            
+            ## 🔧 **Supported Systems**
+            
+            **Source Systems**: PostgreSQL, MySQL, Oracle, SQL Server, MongoDB, Cassandra, Redis, Elasticsearch, CSV, JSON, Parquet, Avro, and more!
+            
+            **Target Systems**: Apache Spark, Hive, BigQuery, Snowflake, Redshift, Databricks, EMR, Kubernetes, and more!
+            
+            ---
+            
+            ## 📊 **Understanding Results**
+            
+            - **Expected Quality**: Predicted data quality after migration
+            - **Processing Time**: Estimated time to complete migration
+            - **Resource Usage**: How much of your resources will be used
+            - **Success Probability**: Likelihood of successful migration
+            - **Risk Assessment**: Potential issues and mitigation strategies
+            
+            ---
+            
+            ## 💡 **Tips for Best Results**
+            
+            1. **Be accurate** with your data size and complexity estimates
+            2. **Consider your team's expertise** when setting constraints
+            3. **Review risk factors** and mitigation strategies
+            4. **Export strategies** for team collaboration
+            5. **Test with smaller datasets** first if possible
+            """)
     
     # Initialize session state
     if 'rl_optimizer' not in st.session_state:
@@ -119,6 +183,38 @@ def main():
     # Sidebar for configuration
     with st.sidebar:
         st.markdown("### ⚙️ **Configuration**")
+        
+        # Quick Start Guide
+        with st.expander("🚀 **Quick Start Guide**", expanded=False):
+            st.markdown("""
+            **New User? Start Here!**
+            
+            1. **Fill basic info** (table name, size, source, target)
+            2. **Set resource limits** (CPU, memory, network)
+            3. **Click Generate** to get your strategy
+            4. **Review results** and export if needed
+            
+            **Need Help?** Click the ❓ Help button in the header!
+            """)
+        
+        # Session Status
+        st.markdown("#### 📊 **Session Status**")
+        current_strategy = st.session_state.get('current_strategy', None)
+        
+        if current_strategy and isinstance(current_strategy, dict):
+            try:
+                quality = current_strategy.get('expected_performance', {}).get('quality_score', 0)
+                st.success("✅ Strategy Generated")
+                st.metric("Quality Score", f"{quality:.1%}")
+                
+                # Show additional info
+                risk = current_strategy.get('risk_assessment', {}).get('risk_level', 'UNKNOWN')
+                st.info(f"Risk Level: {risk}")
+            except Exception as e:
+                st.error(f"Error displaying strategy: {e}")
+        else:
+            st.info("⏳ Ready to Generate")
+            st.markdown("Fill in the form and click **Generate Migration Strategy**")
         
         # Model training section
         st.markdown("#### 🎯 **Model Training**")
@@ -145,39 +241,52 @@ def main():
         # Performance metrics
         st.markdown("#### 📊 **System Status**")
         try:
-            # Get current session metrics
-            total_optimizations = len(st.session_state.optimization_history)
-            current_strategy = st.session_state.current_strategy
+            # Get current session metrics - force refresh
+            total_optimizations = len(st.session_state.get('optimization_history', []))
+            current_strategy = st.session_state.get('current_strategy', None)
             
             # Display meaningful metrics
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
-                st.metric("Session Optimizations", total_optimizations)
+                if total_optimizations > 0:
+                    st.metric("Session Optimizations", total_optimizations)
+                else:
+                    st.metric("Session Optimizations", "0", help="No strategies generated yet")
             
             with col2:
-                if current_strategy:
-                    quality = current_strategy['expected_performance']['quality_score']
-                    st.metric("Latest Quality", f"{quality:.1%}")
+                if current_strategy and isinstance(current_strategy, dict):
+                    try:
+                        quality = current_strategy.get('expected_performance', {}).get('quality_score', 0)
+                        st.metric("Latest Quality", f"{quality:.1%}")
+                    except:
+                        st.metric("Latest Quality", "Error", help="Issue with quality data")
                 else:
-                    st.metric("Latest Quality", "N/A")
+                    st.metric("Latest Quality", "Not Set", help="Generate a strategy to see quality metrics")
             
             with col3:
-                if current_strategy:
-                    time = current_strategy['expected_performance']['processing_time_minutes']
-                    st.metric("Latest Time", f"{time:.1f} min")
+                if current_strategy and isinstance(current_strategy, dict):
+                    try:
+                        time = current_strategy.get('expected_performance', {}).get('processing_time_minutes', 0)
+                        st.metric("Latest Time", f"{time:.1f} min")
+                    except:
+                        st.metric("Latest Time", "Error", help="Issue with time data")
                 else:
-                    st.metric("Latest Time", "N/A")
+                    st.metric("Latest Time", "Not Set", help="Generate a strategy to see time estimates")
             
             with col4:
-                if current_strategy:
-                    risk = current_strategy['risk_assessment']['risk_level']
-                    st.metric("Latest Risk", risk)
+                if current_strategy and isinstance(current_strategy, dict):
+                    try:
+                        risk = current_strategy.get('risk_assessment', {}).get('risk_level', 'UNKNOWN')
+                        st.metric("Latest Risk", risk)
+                    except:
+                        st.metric("Latest Risk", "Error", help="Issue with risk data")
                 else:
-                    st.metric("Latest Risk", "N/A")
+                    st.metric("Latest Risk", "Not Set", help="Generate a strategy to see risk assessment")
                     
         except Exception as e:
             st.error(f"Error loading metrics: {e}")
+            st.write(f"Debug info: {type(current_strategy)}, {current_strategy}")
     
     # Main content area
     col1, col2 = st.columns([2, 1])
@@ -185,8 +294,25 @@ def main():
     with col1:
         st.markdown("### 📋 **Migration Strategy Optimization**")
         
+        # Welcome message when no strategy exists
+        if not st.session_state.current_strategy:
+            st.info("""
+            🚀 **Welcome to Spark Migration Advisor!**
+            
+            To get started:
+            1. **Fill in your migration details** below
+            2. **Set your resource constraints** 
+            3. **Click 'Generate Migration Strategy'** to get AI-powered recommendations
+            
+            Your first strategy will appear here with detailed metrics and recommendations!
+            """)
+        
         # Table information input
-        with st.expander("📝 **Table Information**", expanded=True):
+        with st.expander("📝 **Table Information** 📖", expanded=True):
+            st.markdown("""
+            **💡 Quick Help**: Fill in the basic details about your data source and target system. 
+            Be as accurate as possible for better recommendations.
+            """)
             col1a, col1b = st.columns(2)
             
             with col1a:
@@ -209,7 +335,11 @@ def main():
                 concurrent_migrations = st.number_input("Parallel Jobs", min_value=1, max_value=50, value=2, help="How many migrations can run simultaneously")
         
         # Advanced Configuration Options
-        with st.expander("🔧 **Advanced Configuration Options**", expanded=False):
+        with st.expander("🔧 **Advanced Configuration Options** 📖", expanded=False):
+            st.markdown("""
+            **💡 Quick Help**: These advanced options help fine-tune your migration strategy. 
+            If you're unsure, you can leave these as defaults.
+            """)
             col_adv1, col_adv2 = st.columns(2)
             
             with col_adv1:
@@ -278,8 +408,12 @@ def main():
                     
                     st.success("✅ Migration strategy optimized successfully!")
                     
+                    # Debug info to verify strategy was created
+                    st.info(f"Strategy created with {len(strategy)} keys: {list(strategy.keys())}")
+                    
                 except Exception as e:
                     st.error(f"❌ Optimization failed: {e}")
+                    st.error(f"Error details: {type(e).__name__}: {str(e)}")
     
     with col2:
         st.markdown("### 📈 **Quick Stats**")
@@ -318,6 +452,37 @@ def main():
     if st.session_state.current_strategy:
         st.markdown("---")
         st.markdown("### 🎯 **Optimized Migration Strategy**")
+        
+        # Results Explanation
+        with st.expander("📖 **Understanding Your Results**", expanded=False):
+            st.markdown("""
+            ## 📊 **What Each Metric Means**
+            
+            **Expected Quality**: How clean and accurate your data will be after migration (higher is better)
+            
+            **Processing Time**: Estimated time to complete the entire migration process
+            
+            **Resource Usage**: Percentage of your available resources that will be utilized
+            
+            **Success Probability**: Likelihood of completing the migration without major issues
+            
+            ---
+            
+            ## ⚠️ **Risk Assessment Guide**
+            
+            **🟢 LOW RISK**: Safe to proceed, minimal issues expected
+            **🟡 MEDIUM RISK**: Some challenges possible, review mitigation strategies
+            **🔴 HIGH RISK**: Significant challenges expected, consider alternatives
+            
+            ---
+            
+            ## 🔧 **Action Items**
+            
+            1. **Review the strategy** and ensure it meets your requirements
+            2. **Check risk factors** and implement mitigation strategies
+            3. **Export the strategy** for team review and implementation
+            4. **Monitor progress** during actual migration
+            """)
         
         strategy = st.session_state.current_strategy
         
