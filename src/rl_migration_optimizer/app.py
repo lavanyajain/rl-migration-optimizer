@@ -238,8 +238,9 @@ def main():
                     
                     # Generate comprehensive migration strategy
                     strategy = st.session_state.rl_optimizer.optimize_migration_strategy(
-                        migration_config=migration_config,
-                        current_quality=current_quality
+                        table_info=migration_config['basic_info'],
+                        current_quality=current_quality,
+                        resource_constraints=migration_config['resource_constraints']
                     )
                     
                     st.session_state.current_strategy = strategy
