@@ -21,8 +21,8 @@ from .optimizer import MockMigrationOptimizer
 
 # Set page config
 st.set_page_config(
-    page_title="RL Migration Optimizer",
-    page_icon="🤖",
+    page_title="Spark Migration Advisor",
+    page_icon="🚀",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -79,8 +79,8 @@ def main():
     # Header
     st.markdown("""
     <div class="main-header">
-        <h1>🤖 Reinforcement Learning Migration Optimizer</h1>
-        <p>AI-Powered Database Migration Strategy Optimization using Deep Q-Networks</p>
+        <h1>🚀 Spark Migration Advisor</h1>
+        <p>AI-Powered Database Migration Strategy Generator with Spark Configuration Recommendations</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -438,8 +438,8 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.8em;'>
-        🤖 <strong>Reinforcement Learning Migration Optimizer</strong> | 
-        Uses Deep Q-Network (DQN) to learn optimal migration strategies
+        🚀 <strong>Spark Migration Advisor</strong> | 
+        AI-Powered Database Migration Strategy Generator with Spark Configuration Recommendations
     </div>
     """, unsafe_allow_html=True)
 

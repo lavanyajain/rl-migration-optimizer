@@ -1,4 +1,4 @@
-# 🤖 RL Migration Optimizer Package
+# 🚀 Spark Migration Advisor Package
 
 A professional Python package that provides AI-powered database migration strategy optimization using Reinforcement Learning concepts. This package is designed to be easily deployable on [Streamlit Cloud](https://share.streamlit.io/) and other hosting platforms.
 
